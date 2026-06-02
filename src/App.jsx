@@ -16,18 +16,22 @@ function App() {
   const [batteries, setBatteries] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("http://localhost:5001/batteries");
-        const data = await res.json();
-        setBatteries(data);
-      } catch (err) {
-        console.error("Fetch Error:", err);
+    const fetchData = () => {
+      const liveData = [];
+
+      for (let i = 1; i <= 10; i++) {
+        liveData.push({
+          id: `B${i}`,
+          voltage: Number((Math.random() * 5 + 8).toFixed(2)),
+        });
       }
+
+      setBatteries(liveData);
     };
 
     fetchData();
     const interval = setInterval(fetchData, 3000);
+
     return () => clearInterval(interval);
   }, []);
 
