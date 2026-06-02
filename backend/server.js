@@ -39,8 +39,12 @@ app.get("/batteries", async (req, res) => {
     const voltage = Number((Math.random() * 5 + 8).toFixed(2));
 
     let status = "NORMAL";
-    if (voltage < 8.75) status = "UNDER VOLTAGE";
-    else if (voltage > 12.5) status = "OVER VOLTAGE";
+
+    if (voltage < 8.75) {
+      status = "UNDER VOLTAGE";
+    } else if (voltage > 12.5) {
+      status = "OVER VOLTAGE";
+    }
 
     batteries.push({
       id: `B${i}`,
@@ -52,13 +56,13 @@ app.get("/batteries", async (req, res) => {
   try {
     await Battery.insertMany(batteries);
   } catch (err) {
-    console.log("Save Error:", err.message);
+    console.log("MongoDB Save Error:", err.message);
   }
 
   res.json(batteries);
 });
 
-// View saved history
+// View saved MongoDB history
 app.get("/history", async (req, res) => {
   try {
     const history = await Battery.find().sort({ time: -1 }).limit(100);
@@ -68,8 +72,9 @@ app.get("/history", async (req, res) => {
   }
 });
 
-const PORT = 5001;
+// Render-compatible port
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`);
+  console.log(`Backend running on port ${PORT}`);
 });
