@@ -16,17 +16,16 @@ function App() {
   const [batteries, setBatteries] = useState([]);
 
   useEffect(() => {
-    const fetchData = () => {
-      const liveData = [];
-
-      for (let i = 1; i <= 10; i++) {
-        liveData.push({
-          id: `B${i}`,
-          voltage: Number((Math.random() * 5 + 8).toFixed(2)),
-        });
+    const fetchData = async () => {
+      try {
+        const res = await fetch(
+          "https://battery-backend-priyashri.onrender.com/batteries",
+        );
+        const data = await res.json();
+        setBatteries(data);
+      } catch (err) {
+        console.error("Fetch Error:", err);
       }
-
-      setBatteries(liveData);
     };
 
     fetchData();
@@ -47,6 +46,7 @@ function App() {
   const downloadExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(batteries);
     const workbook = XLSX.utils.book_new();
+
     XLSX.utils.book_append_sheet(workbook, worksheet, "Battery Data");
 
     const excelBuffer = XLSX.write(workbook, {
