@@ -44,9 +44,16 @@ function App() {
   );
 
   const downloadExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(batteries);
-    const workbook = XLSX.utils.book_new();
+    const excelData = batteries.map((battery) => ({
+      "Battery ID": battery.id,
+      "Voltage (V)": battery.voltage,
+      Status: battery.status,
+      Timestamp: new Date().toLocaleString(),
+    }));
 
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Battery Data");
 
     const excelBuffer = XLSX.write(workbook, {
