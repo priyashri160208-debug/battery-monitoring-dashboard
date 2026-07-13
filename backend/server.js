@@ -59,16 +59,33 @@ app.post("/battery", async (req, res) => {
 });
 
 // Send latest battery data to React
+// Send latest battery data to React in B1-B10 order
 app.get("/batteries", async (req, res) => {
   try {
-    const batteries = await Battery.find().sort({ time: -1 }).limit(10);
+    const batteries = await Battery.aggregate([
+      {
+        $sort: { time: -1 },
+      },
+      {
+        $group: {
+          _id: "$id",
+          id: { $first: "$id" },
+          voltage: { $first: "$voltage" },
+          status: { $first: "$status" },
+          time: { $first: "$time" },
+        },
+      },
+    ]);
+
+    batteries.sort((a, b) => {
+      return Number(a.id.substring(1)) - Number(b.id.substring(1));
+    });
 
     res.json(batteries);
   } catch (err) {
     res.status(500).send(err.message);
   }
 });
-
 // View saved MongoDB history
 app.get("/history", async (req, res) => {
   try {
