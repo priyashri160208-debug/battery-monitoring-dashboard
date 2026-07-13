@@ -32,34 +32,41 @@ app.get("/", (req, res) => {
 });
 
 // Live battery data + save to MongoDB
+// Receive battery data from ESP32
+app.post("/battery", async (req, res) => {
+  const { id, voltage } = req.body;
+
+  let status = "NORMAL";
+
+  if (voltage < 8.75) {
+    status = "UNDER VOLTAGE";
+  } else if (voltage > 12.5) {
+    status = "OVER VOLTAGE";
+  }
+
+  const battery = new Battery({
+    id,
+    voltage,
+    status,
+  });
+
+  await battery.save();
+
+  res.json({
+    message: "Battery data received",
+    battery,
+  });
+});
+
+// Send latest battery data to React
 app.get("/batteries", async (req, res) => {
-  const batteries = [];
-
-  for (let i = 1; i <= 10; i++) {
-    const voltage = Number((Math.random() * 5 + 8).toFixed(2));
-
-    let status = "NORMAL";
-
-    if (voltage < 8.75) {
-      status = "UNDER VOLTAGE";
-    } else if (voltage > 12.5) {
-      status = "OVER VOLTAGE";
-    }
-
-    batteries.push({
-      id: `B${i}`,
-      voltage,
-      status,
-    });
-  }
-
   try {
-    await Battery.insertMany(batteries);
-  } catch (err) {
-    console.log("MongoDB Save Error:", err.message);
-  }
+    const batteries = await Battery.find().sort({ time: -1 }).limit(10);
 
-  res.json(batteries);
+    res.json(batteries);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
 });
 
 // View saved MongoDB history
