@@ -9,8 +9,8 @@ app.use(express.json());
 
 // Local MongoDB connection
 mongoose
-  .connect("mongodb://127.0.0.1:27017/batteryDB")
-  .then(() => console.log("✅ Local MongoDB Connected"))
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("✅ MongoDB Atlas Connected"))
   .catch((err) => console.log("❌ MongoDB Error:", err.message));
 
 // Battery Schema
